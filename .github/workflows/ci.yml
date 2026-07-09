@@ -15,3 +15,4 @@ jobs:
     uses: faezeh-kianimoravej/flink-platform/.github/workflows/flink-job-ci-template.yml@main
     with:
       image_name: tenant-b-flink-job
+      java_version: "21"

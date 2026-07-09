@@ -1,4 +1,4 @@
-FROM flink:2.2.1-java21
+FROM flink:1.19-java17
 
 ARG JOB_JAR=target/tenant-b-flink-job-0.1.0-SNAPSHOT.jar
 

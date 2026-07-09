@@ -1,0 +1,39 @@
+# Maven
+target/
+dependency-reduced-pom.xml
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iml
+
+# IDE - VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~

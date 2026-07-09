@@ -1,0 +1,13 @@
+name: Tenant B Flink Job CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: faezeh-kianimoravej/flink-platform/.github/workflows/flink-job-ci-template.yml@main
+    with:
+      image_name: tenant-b-flink-job

@@ -121,6 +121,14 @@ src/test/java/com/example/tenantb/
 
 This project currently uses Apache Flink 2.2.1 and the Flink Kafka connector 5.0.0-2.2.
 
+## Continuous Integration
+
+CI is provided by the reusable platform workflow in the `flink-platform` repository. This repository only supplies tenant-specific configuration, including the Tenant B image name.
+
+The shared workflow builds, tests, and packages the application, then builds a Docker image and publishes it to GitHub Container Registry (GHCR).
+
+Deployment is handled separately by the `flink-platform` GitOps repository using Argo CD and the Flink Kubernetes Operator.
+
 ## Build
 
 Compile, test, and package the application:

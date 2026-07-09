@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   ci:
     uses: faezeh-kianimoravej/flink-platform/.github/workflows/flink-job-ci-template.yml@main

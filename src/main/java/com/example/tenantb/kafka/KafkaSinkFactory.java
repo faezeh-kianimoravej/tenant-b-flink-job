@@ -25,6 +25,7 @@ public final class KafkaSinkFactory {
     public static KafkaSink<EnrichedOrder> createEnrichedOrderSink(FlinkJobConfig config) {
         return KafkaSink.<EnrichedOrder>builder()
                 .setBootstrapServers(config.bootstrapServers())
+                .setKafkaProducerConfig(config.kafkaClientProperties())
                 .setRecordSerializer(KafkaRecordSerializationSchema.builder()
                         .setTopic(config.outputTopic())
                         .setValueSerializationSchema(new JsonSerializationSchema<EnrichedOrder>())

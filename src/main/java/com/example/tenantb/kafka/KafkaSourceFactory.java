@@ -32,6 +32,7 @@ public final class KafkaSourceFactory {
                 .setBootstrapServers(config.bootstrapServers())
                 .setTopics(config.ordersInputTopic())
                 .setGroupId(config.consumerGroupId())
+                .setProperties(config.kafkaClientProperties())
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(Order.class))
                 .build();
@@ -51,6 +52,7 @@ public final class KafkaSourceFactory {
                 .setBootstrapServers(config.bootstrapServers())
                 .setTopics(config.productsInputTopic())
                 .setGroupId(config.consumerGroupId() + "-products")
+                .setProperties(config.kafkaClientProperties())
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(Product.class))
                 .build();

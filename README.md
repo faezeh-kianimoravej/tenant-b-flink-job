@@ -68,7 +68,8 @@ orders.input.topic=tenant-b-orders
 products.input.topic=tenant-b-products
 output.topic=tenant-b-enriched-orders
 consumer.group.id=tenant-b-flink-job
-platform.application.id=app-tenant-b-001
+platform.application.id=APP-TENANT-B
+kafka.user=tenant-b-flink-user
 application.name=tenant-b-product-enrichment
 owner.team=tenant-b
 environment=dev
@@ -85,6 +86,34 @@ java -jar target/tenant-b-flink-job-0.1.0-SNAPSHOT.jar \
   --products.input.topic=tenant-b-products \
   --output.topic=tenant-b-enriched-orders
 ```
+
+The products source derives a second consumer group from the base group:
+
+```text
+tenant-b-flink-job-products
+```
+
+Kafka authentication settings are supplied by the platform deployment. Credentials are not stored in this repository.
+
+Supported command-line or environment configuration:
+
+```text
+--kafka.security.protocol=SASL_PLAINTEXT
+--kafka.sasl.mechanism=SCRAM-SHA-512
+--kafka.username=<from KAFKA_USERNAME>
+--kafka.password=<from KAFKA_PASSWORD>
+```
+
+In Kubernetes, the `flink-platform` Helm chart reads the selected Strimzi-generated KafkaUser Secret and injects:
+
+```text
+KAFKA_SECURITY_PROTOCOL
+KAFKA_SASL_MECHANISM
+KAFKA_USERNAME
+KAFKA_PASSWORD
+```
+
+`FlinkJobConfig` constructs `sasl.jaas.config` at runtime and both `KafkaSourceFactory` and `KafkaSinkFactory` use the same authenticated Kafka client properties.
 
 ## Repository Structure
 

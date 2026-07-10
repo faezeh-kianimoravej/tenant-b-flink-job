@@ -3,6 +3,7 @@ package com.example.tenantb.config;
 import com.example.tenantb.model.JobMetadata;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Immutable runtime configuration for the Tenant B Flink job.
@@ -17,6 +18,7 @@ import java.util.Map;
  * @param productsInputTopic Kafka topic containing product reference events
  * @param outputTopic Kafka topic that receives enriched order events
  * @param consumerGroupId Kafka consumer group used for the order stream; the product stream derives a related group
+ * @param kafkaUser non-secret Strimzi KafkaUser name selected by the platform deployment
  * @param jobMetadata descriptive platform metadata for ownership, environment, and job naming
  */
 public record FlinkJobConfig(
@@ -26,6 +28,11 @@ public record FlinkJobConfig(
         String productsInputTopic,
         String outputTopic,
         String consumerGroupId,
+        String kafkaUser,
+        String kafkaSecurityProtocol,
+        String kafkaSaslMechanism,
+        String kafkaUsername,
+        String kafkaPassword,
         JobMetadata jobMetadata) {
 
     public static final String DEFAULT_TENANT = "tenant-b";
@@ -34,7 +41,10 @@ public record FlinkJobConfig(
     public static final String DEFAULT_PRODUCTS_INPUT_TOPIC = "tenant-b-products";
     public static final String DEFAULT_OUTPUT_TOPIC = "tenant-b-enriched-orders";
     public static final String DEFAULT_CONSUMER_GROUP_ID = "tenant-b-flink-job";
-    public static final String DEFAULT_PLATFORM_APPLICATION_ID = "app-tenant-b-001";
+    public static final String DEFAULT_PLATFORM_APPLICATION_ID = "APP-TENANT-B";
+    public static final String DEFAULT_KAFKA_USER = "tenant-b-flink-user";
+    public static final String DEFAULT_KAFKA_SECURITY_PROTOCOL = "";
+    public static final String DEFAULT_KAFKA_SASL_MECHANISM = "";
     public static final String DEFAULT_APPLICATION_NAME = "tenant-b-product-enrichment";
     public static final String DEFAULT_OWNER_TEAM = "tenant-b";
     public static final String DEFAULT_ENVIRONMENT = "dev";
@@ -66,6 +76,11 @@ public record FlinkJobConfig(
                 DEFAULT_PRODUCTS_INPUT_TOPIC,
                 DEFAULT_OUTPUT_TOPIC,
                 DEFAULT_CONSUMER_GROUP_ID,
+                DEFAULT_KAFKA_USER,
+                DEFAULT_KAFKA_SECURITY_PROTOCOL,
+                DEFAULT_KAFKA_SASL_MECHANISM,
+                "",
+                "",
                 metadata);
     }
 
@@ -99,7 +114,29 @@ public record FlinkJobConfig(
                 values.getOrDefault("products.input.topic", DEFAULT_PRODUCTS_INPUT_TOPIC),
                 values.getOrDefault("output.topic", DEFAULT_OUTPUT_TOPIC),
                 values.getOrDefault("consumer.group.id", DEFAULT_CONSUMER_GROUP_ID),
+                values.getOrDefault("kafka.user", DEFAULT_KAFKA_USER),
+                valueOrEnv(values, "kafka.security.protocol", "KAFKA_SECURITY_PROTOCOL",
+                        DEFAULT_KAFKA_SECURITY_PROTOCOL),
+                valueOrEnv(values, "kafka.sasl.mechanism", "KAFKA_SASL_MECHANISM", DEFAULT_KAFKA_SASL_MECHANISM),
+                valueOrEnv(values, "kafka.username", "KAFKA_USERNAME", ""),
+                valueOrEnv(values, "kafka.password", "KAFKA_PASSWORD", ""),
                 metadata);
+    }
+
+    public Properties kafkaClientProperties() {
+        Properties properties = new Properties();
+        if (isBlank(kafkaSecurityProtocol)) {
+            return properties;
+        }
+
+        properties.setProperty("security.protocol", kafkaSecurityProtocol);
+        if (!isBlank(kafkaSaslMechanism)) {
+            properties.setProperty("sasl.mechanism", kafkaSaslMechanism);
+        }
+        if (!isBlank(kafkaUsername) || !isBlank(kafkaPassword)) {
+            properties.setProperty("sasl.jaas.config", buildScramJaasConfig(kafkaUsername, kafkaPassword));
+        }
+        return properties;
     }
 
     private static Map<String, String> parseArgs(String[] args) {
@@ -121,5 +158,31 @@ public record FlinkJobConfig(
             values.put(arg.substring(2, separatorIndex), arg.substring(separatorIndex + 1));
         }
         return values;
+    }
+
+    private static String valueOrEnv(Map<String, String> values, String key, String envName, String defaultValue) {
+        String value = values.get(key);
+        if (!isBlank(value)) {
+            return value;
+        }
+
+        String envValue = System.getenv(envName);
+        return isBlank(envValue) ? defaultValue : envValue;
+    }
+
+    private static String buildScramJaasConfig(String username, String password) {
+        return "org.apache.kafka.common.security.scram.ScramLoginModule required username=\""
+                + escapeJaasValue(username)
+                + "\" password=\""
+                + escapeJaasValue(password)
+                + "\";";
+    }
+
+    private static String escapeJaasValue(String value) {
+        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 }

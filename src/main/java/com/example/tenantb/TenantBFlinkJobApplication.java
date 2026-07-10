@@ -2,6 +2,7 @@ package com.example.tenantb;
 
 import com.example.tenantb.config.FlinkJobConfig;
 import com.example.tenantb.job.ProductEnrichmentJob;
+import com.example.tenantb.kafka.KafkaSecurityFailureHandler;
 import com.example.tenantb.model.JobMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,10 @@ public final class TenantBFlinkJobApplication {
      * @throws Exception if the Flink pipeline cannot be submitted or executed
      */
     public static void main(String[] args) throws Exception {
+        run(args, (config, metadata) -> new ProductEnrichmentJob(config, metadata).execute());
+    }
+
+    static void run(String[] args, JobRunner jobRunner) throws Exception {
         FlinkJobConfig config = FlinkJobConfig.fromArgs(args);
         JobMetadata metadata = config.jobMetadata();
 
@@ -40,7 +45,15 @@ public final class TenantBFlinkJobApplication {
                 config.productsInputTopic(),
                 config.outputTopic());
 
-        ProductEnrichmentJob job = new ProductEnrichmentJob(config, metadata);
-        job.execute();
+        try {
+            jobRunner.execute(config, metadata);
+        } catch (Exception exception) {
+            throw KafkaSecurityFailureHandler.wrapIfKafkaSecurityFailure(exception, config);
+        }
+    }
+
+    @FunctionalInterface
+    interface JobRunner {
+        void execute(FlinkJobConfig config, JobMetadata metadata) throws Exception;
     }
 }

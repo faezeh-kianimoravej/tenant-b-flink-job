@@ -13,9 +13,6 @@ public class EnrichedOrder {
     private String orderId;
     private String productId;
     private String productName;
-    private String category;
-    private Double price;
-    private int quantity;
     private String tenant;
     private String processedBy;
 
@@ -30,10 +27,7 @@ public class EnrichedOrder {
      *
      * @param orderId unique business identifier for the order
      * @param productId product identifier used as the join key
-     * @param productName human-readable product name, or a fallback value when product data is missing
-     * @param category product category, or a fallback value when product data is missing
-     * @param price product unit price, or {@code null} when product data is missing
-     * @param quantity number of product units ordered
+     * @param productName human-readable product name
      * @param tenant tenant identifier that owns the event
      * @param processedBy job identifier that produced the event
      */
@@ -41,17 +35,11 @@ public class EnrichedOrder {
             String orderId,
             String productId,
             String productName,
-            String category,
-            Double price,
-            int quantity,
             String tenant,
             String processedBy) {
         this.orderId = orderId;
         this.productId = productId;
         this.productName = productName;
-        this.category = category;
-        this.price = price;
-        this.quantity = quantity;
         this.tenant = tenant;
         this.processedBy = processedBy;
     }
@@ -111,60 +99,6 @@ public class EnrichedOrder {
     }
 
     /**
-     * Returns the product category included in the enriched output.
-     *
-     * @return product category or fallback text
-     */
-    public String getCategory() {
-        return category;
-    }
-
-    /**
-     * Sets the product category included in the enriched output.
-     *
-     * @param category product category or fallback text
-     */
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    /**
-     * Returns the product unit price.
-     *
-     * @return product unit price, or {@code null} when product data was not available
-     */
-    public Double getPrice() {
-        return price;
-    }
-
-    /**
-     * Sets the product unit price.
-     *
-     * @param price product unit price, or {@code null} when product data was not available
-     */
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    /**
-     * Returns the ordered quantity.
-     *
-     * @return number of product units ordered
-     */
-    public int getQuantity() {
-        return quantity;
-    }
-
-    /**
-     * Sets the ordered quantity.
-     *
-     * @param quantity number of product units ordered
-     */
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    /**
      * Returns the tenant that owns the output event.
      *
      * @return tenant identifier
@@ -214,12 +148,9 @@ public class EnrichedOrder {
         if (!(o instanceof EnrichedOrder that)) {
             return false;
         }
-        return quantity == that.quantity
-                && Objects.equals(orderId, that.orderId)
+        return Objects.equals(orderId, that.orderId)
                 && Objects.equals(productId, that.productId)
                 && Objects.equals(productName, that.productName)
-                && Objects.equals(category, that.category)
-                && Objects.equals(price, that.price)
                 && Objects.equals(tenant, that.tenant)
                 && Objects.equals(processedBy, that.processedBy);
     }
@@ -231,7 +162,7 @@ public class EnrichedOrder {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(orderId, productId, productName, category, price, quantity, tenant, processedBy);
+        return Objects.hash(orderId, productId, productName, tenant, processedBy);
     }
 
     /**
@@ -245,9 +176,6 @@ public class EnrichedOrder {
                 + "orderId='" + orderId + '\''
                 + ", productId='" + productId + '\''
                 + ", productName='" + productName + '\''
-                + ", category='" + category + '\''
-                + ", price=" + price
-                + ", quantity=" + quantity
                 + ", tenant='" + tenant + '\''
                 + ", processedBy='" + processedBy + '\''
                 + '}';

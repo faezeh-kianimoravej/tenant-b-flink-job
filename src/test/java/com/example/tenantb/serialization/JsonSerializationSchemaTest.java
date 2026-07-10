@@ -16,12 +16,11 @@ class JsonSerializationSchemaTest {
         Order order = schema.deserialize("""
                 {
                   "orderId": "order-1",
-                  "productId": "product-1",
-                  "quantity": 2
+                  "productId": "product-1"
                 }
                 """.getBytes(StandardCharsets.UTF_8));
 
-        assertEquals(new Order("order-1", "product-1", 2), order);
+        assertEquals(new Order("order-1", "product-1"), order);
     }
 
     @Test
@@ -32,9 +31,6 @@ class JsonSerializationSchemaTest {
                 "order-1",
                 "product-1",
                 "Coffee",
-                "Beverages",
-                4.50,
-                2,
                 "tenant-b",
                 "tenant-b-flink-job");
 

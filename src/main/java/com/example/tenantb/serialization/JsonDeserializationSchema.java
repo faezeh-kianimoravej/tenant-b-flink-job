@@ -1,5 +1,6 @@
 package com.example.tenantb.serialization;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
@@ -14,7 +15,8 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
  * @param <T> target POJO type produced by the schema
  */
 public class JsonDeserializationSchema<T> implements DeserializationSchema<T> {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private final Class<T> targetType;
 
@@ -36,7 +38,14 @@ public class JsonDeserializationSchema<T> implements DeserializationSchema<T> {
      */
     @Override
     public T deserialize(byte[] message) throws IOException {
-        return OBJECT_MAPPER.readValue(message, targetType);
+        if (message == null || new String(message).trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return OBJECT_MAPPER.readValue(message, targetType);
+        } catch (IOException exception) {
+            return null;
+        }
     }
 
     /**

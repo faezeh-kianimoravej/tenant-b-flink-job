@@ -23,7 +23,7 @@ Join key:
 
 - `productId`
 
-The job uses a prototype-friendly keyed stream join. Product records are stored by `productId`; when an order arrives, the job emits an enriched order using the latest known product details. If product details are not available yet, the output uses a clear fallback product name and category.
+The job uses a prototype-friendly keyed stream join. Product records are stored by `productId`; when an order arrives, the job emits an enriched order using the latest known product details. If product details are not available yet, the order is kept in keyed state and emitted when the matching product arrives.
 
 ## Example Messages
 
@@ -32,8 +32,7 @@ Order input:
 ```json
 {
   "orderId": "order-1",
-  "productId": "product-1",
-  "quantity": 2
+  "productId": "product-1"
 }
 ```
 
@@ -42,9 +41,7 @@ Product input:
 ```json
 {
   "productId": "product-1",
-  "productName": "Coffee",
-  "category": "Beverages",
-  "price": 4.50
+  "name": "Coffee"
 }
 ```
 
@@ -55,9 +52,6 @@ Enriched output:
   "orderId": "order-1",
   "productId": "product-1",
   "productName": "Coffee",
-  "category": "Beverages",
-  "price": 4.50,
-  "quantity": 2,
   "tenant": "tenant-b",
   "processedBy": "tenant-b-flink-job"
 }

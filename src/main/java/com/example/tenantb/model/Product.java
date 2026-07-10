@@ -4,16 +4,10 @@ import java.util.Objects;
 
 /**
  * Product reference event consumed from the Tenant B products Kafka topic.
- *
- * <p>This POJO represents the product side of the enrichment join. Product events are keyed by {@code productId} and
- * stored in Flink keyed state so incoming orders can be decorated with the latest known product name, category, and
- * price.</p>
  */
 public class Product {
     private String productId;
-    private String productName;
-    private String category;
-    private Double price;
+    private String name;
 
     /**
      * Creates an empty product for frameworks that require a no-argument constructor.
@@ -22,18 +16,14 @@ public class Product {
     }
 
     /**
-     * Creates a product reference event with all fields populated.
+     * Creates a product reference event.
      *
      * @param productId product identifier used as the join key
-     * @param productName human-readable product name
-     * @param category product category used for downstream grouping or reporting
-     * @param price product unit price
+     * @param name product display name
      */
-    public Product(String productId, String productName, String category, Double price) {
+    public Product(String productId, String name) {
         this.productId = productId;
-        this.productName = productName;
-        this.category = category;
-        this.price = price;
+        this.name = name;
     }
 
     /**
@@ -59,53 +49,17 @@ public class Product {
      *
      * @return product name
      */
-    public String getProductName() {
-        return productName;
+    public String getName() {
+        return name;
     }
 
     /**
      * Sets the human-readable product name.
      *
-     * @param productName product name
+     * @param name product name
      */
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
-    /**
-     * Returns the product category.
-     *
-     * @return product category
-     */
-    public String getCategory() {
-        return category;
-    }
-
-    /**
-     * Sets the product category.
-     *
-     * @param category product category
-     */
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    /**
-     * Returns the product unit price.
-     *
-     * @return product unit price
-     */
-    public Double getPrice() {
-        return price;
-    }
-
-    /**
-     * Sets the product unit price.
-     *
-     * @param price product unit price
-     */
-    public void setPrice(Double price) {
-        this.price = price;
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -123,9 +77,7 @@ public class Product {
             return false;
         }
         return Objects.equals(productId, product.productId)
-                && Objects.equals(productName, product.productName)
-                && Objects.equals(category, product.category)
-                && Objects.equals(price, product.price);
+                && Objects.equals(name, product.name);
     }
 
     /**
@@ -135,7 +87,7 @@ public class Product {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(productId, productName, category, price);
+        return Objects.hash(productId, name);
     }
 
     /**
@@ -147,9 +99,7 @@ public class Product {
     public String toString() {
         return "Product{"
                 + "productId='" + productId + '\''
-                + ", productName='" + productName + '\''
-                + ", category='" + category + '\''
-                + ", price=" + price
+                + ", name='" + name + '\''
                 + '}';
     }
 }

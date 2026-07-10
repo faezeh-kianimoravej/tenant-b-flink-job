@@ -12,7 +12,6 @@ import java.util.Objects;
 public class Order {
     private String orderId;
     private String productId;
-    private int quantity;
 
     /**
      * Creates an empty order for frameworks that require a no-argument constructor.
@@ -25,12 +24,10 @@ public class Order {
      *
      * @param orderId unique business identifier for the order
      * @param productId product identifier used as the join key
-     * @param quantity number of product units ordered
      */
-    public Order(String orderId, String productId, int quantity) {
+    public Order(String orderId, String productId) {
         this.orderId = orderId;
         this.productId = productId;
-        this.quantity = quantity;
     }
 
     /**
@@ -70,24 +67,6 @@ public class Order {
     }
 
     /**
-     * Returns the ordered quantity.
-     *
-     * @return number of product units ordered
-     */
-    public int getQuantity() {
-        return quantity;
-    }
-
-    /**
-     * Sets the ordered quantity.
-     *
-     * @param quantity number of product units ordered
-     */
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    /**
      * Compares orders by their serialized business fields.
      *
      * @param o object to compare with this order
@@ -101,8 +80,7 @@ public class Order {
         if (!(o instanceof Order order)) {
             return false;
         }
-        return quantity == order.quantity
-                && Objects.equals(orderId, order.orderId)
+        return Objects.equals(orderId, order.orderId)
                 && Objects.equals(productId, order.productId);
     }
 
@@ -113,7 +91,7 @@ public class Order {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(orderId, productId, quantity);
+        return Objects.hash(orderId, productId);
     }
 
     /**
@@ -126,7 +104,6 @@ public class Order {
         return "Order{"
                 + "orderId='" + orderId + '\''
                 + ", productId='" + productId + '\''
-                + ", quantity=" + quantity
                 + '}';
     }
 }

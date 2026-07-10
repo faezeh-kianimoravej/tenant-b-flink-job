@@ -14,6 +14,8 @@ import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.util.Objects;
+
 /**
  * Builds and executes the Tenant B product enrichment Flink pipeline.
  *
@@ -77,12 +79,14 @@ public class ProductEnrichmentJob {
         DataStream<Order> orders = environment.fromSource(
                 ordersSource,
                 WatermarkStrategy.noWatermarks(),
-                config.ordersInputTopic());
+                config.ordersInputTopic())
+                .filter(Objects::nonNull);
 
         DataStream<Product> products = environment.fromSource(
                 productsSource,
                 WatermarkStrategy.noWatermarks(),
-                config.productsInputTopic());
+                config.productsInputTopic())
+                .filter(Objects::nonNull);
 
         // Keyed connect keeps product state scoped by productId before enrichment emits to Kafka.
         orders.keyBy(ProductEnrichmentJob::orderProductKey)

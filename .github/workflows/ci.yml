@@ -11,58 +11,13 @@ permissions:
   packages: write
 
 jobs:
-  build-test-and-publish:
-    name: Build, Test, and Publish Image
-    runs-on: ubuntu-latest
-
-    env:
-      IMAGE: ghcr.io/${{ github.repository_owner }}/tenant-b-flink-job
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-      - name: Checkout source repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: maven
-          server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
-
-      - name: Build and test with Maven
-        run: mvn clean verify
-
-      - name: Verify Flink job JAR exists
-        shell: bash
-        run: |
-          shopt -s nullglob
-          jars=( target/*.jar )
-          if [ ${#jars[@]} -eq 0 ]; then
-            echo "No JAR found for jar_path: target/*.jar"
-            exit 1
-          fi
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Docker image
-        run: |
-          docker build \
-            --file "Dockerfile" \
-            --build-arg JAR_PATH="target/*.jar" \
-            --tag "$IMAGE:latest" \
-            --tag "$IMAGE:${{ github.sha }}" \
-            .
-
-      - name: Push Docker image
-        run: |
-          docker push "$IMAGE:latest"
-          docker push "$IMAGE:${{ github.sha }}"
+  ci:
+    uses: faezeh-kianimoravej/flink-platform/.github/workflows/flink-job-ci-template.yml@main
+    with:
+      image_name: tenant-b-flink-job
+      dockerfile_path: Dockerfile
+      jar_path: target/*.jar
+      java_version: "21"
+      artifact_repository: github-packages
+    secrets:
+      GH_PACKAGES_READ_TOKEN: ${{ secrets.GH_PACKAGES_READ_TOKEN }}

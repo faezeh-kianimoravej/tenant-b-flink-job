@@ -21,3 +21,31 @@ jobs:
       artifact_repository: github-packages
     secrets:
       GH_PACKAGES_READ_TOKEN: ${{ secrets.GH_PACKAGES_READ_TOKEN }}
+
+  promote-dev:
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request dev image promotion
+        env:
+          GH_TOKEN: ${{ secrets.PLATFORM_PROMOTION_TOKEN }}
+          PLATFORM_REPOSITORY: faezeh-kianimoravej/flink-platform
+          TENANT_ID: tenant-b
+          IMAGE_REPOSITORY: ghcr.io/${{ github.repository_owner }}/tenant-b-flink-job
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::PLATFORM_PROMOTION_TOKEN is required to request platform image promotion."
+            exit 1
+          fi
+
+          gh api \
+            --method POST \
+            "repos/${PLATFORM_REPOSITORY}/dispatches" \
+            -f event_type=tenant-image-published \
+            -f client_payload[tenant_id]="$TENANT_ID" \
+            -f client_payload[repository_name]="${{ github.event.repository.name }}" \
+            -f client_payload[image_repository]="$IMAGE_REPOSITORY" \
+            -f client_payload[image_tag]="${{ github.sha }}" \
+            -f client_payload[source_commit_sha]="${{ github.sha }}" \
+            -f client_payload[source_repository]="${{ github.repository }}"

@@ -150,6 +150,24 @@ CI is provided by the reusable platform workflow in the `flink-platform` reposit
 
 The shared workflow builds, tests, and packages the application, then builds a Docker image and publishes it to GitHub Container Registry (GHCR).
 
+On Pull Requests, CI validates the job but does not publish a deployment change. After a change is merged to `main`, CI publishes the image with the immutable full commit SHA tag. Only after that succeeds, the `promote-dev` job sends a promotion request to `flink-platform`.
+
+The promotion request opens a Pull Request in `flink-platform` that updates only:
+
+```text
+tenants/tenant-b/dev-values.yaml
+```
+
+Platform Validation must pass, and a human must review and manually merge the platform PR before Argo CD deploys the new image. Test and production promotion are manual platform PRs using a reviewed immutable SHA.
+
+This repository requires the secret:
+
+```text
+PLATFORM_PROMOTION_TOKEN
+```
+
+For this thesis prototype, use a fine-grained PAT with access to dispatch workflows in `flink-platform`. The token must not be printed or committed.
+
 Deployment is handled separately by the `flink-platform` GitOps repository using Argo CD and the Flink Kubernetes Operator.
 
 ## Build

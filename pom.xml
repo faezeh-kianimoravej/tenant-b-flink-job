@@ -19,7 +19,7 @@
     <description>Tenant B Apache Flink application scaffold.</description>
 
     <properties>
-        <jackson.version>2.19.1</jackson.version>
+        <jackson.version>2.22.1</jackson.version>
         <main.class>com.example.tenantb.TenantBFlinkJobApplication</main.class>
     </properties>
 
